@@ -7,11 +7,18 @@ from collections import Counter
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords
 from nltk.util import ngrams
+from nltk import pos_tag, word_tokenize
+from sklearn.feature_extraction.text import TfidfVectorizer
+import spacy
 
+nltk.download('averaged_perceptron_tagger')
+nltk.download('punkt')
 
 # Download stopwords if not already present
 nltk.download("stopwords")
 stop_words = set(stopwords.words("english"))
+
+nlp = spacy.load("en_core_web_sm")  # Load spaCy's English model
 
 # Custom filler words that don't add meaning
 custom_stopwords = {
@@ -25,6 +32,12 @@ stop_words.update(custom_stopwords)
 
 # SQLite Database Connection
 DATABASE_URL = "sqlite:///hackernews.db"
+
+def extract_proper_nouns_spacy(text):
+    doc = nlp(text)
+    proper_nouns = [token.text for token in doc if token.pos_ == "PROPN"]  # Extract proper nouns
+    return " ".join(proper_nouns)
+
 
 # Fetch All Comments From Today
 def get_todays_comments():
@@ -59,8 +72,8 @@ def generate_ngrams(comments, n=2):
 
 # Generate Word Frequency Map with TF-IDF
 def generate_tfidf_word_map(comments):
-    cleaned_comments = [" ".join(clean_text(comment)) for comment in comments]
-    
+    cleaned_comments = [extract_proper_nouns_spacy(comment) for comment in comments]
+
     # Use TF-IDF Vectorizer to find meaningful words
     vectorizer = TfidfVectorizer(max_features=100, stop_words=list(stop_words))
     tfidf_matrix = vectorizer.fit_transform(cleaned_comments)
