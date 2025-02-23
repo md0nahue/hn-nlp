@@ -1,0 +1,6 @@
+beautifulsoup4==4.13.3
+matplotlib==3.8.4
+nltk==3.8.1
+Requests==2.32.3
+SQLAlchemy==2.0.38
+wordcloud==1.9.4
